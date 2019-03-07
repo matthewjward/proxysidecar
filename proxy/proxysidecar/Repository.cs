@@ -14,12 +14,12 @@ namespace emptysidecar
         public Repository(IConfiguration config)
         {
             _cache = new MemoryCache(new MemoryCacheOptions());
-            _timeout = config.GetValue<int>("Sidecar:CacheTimeSeconds");
+            _timeout = config.GetValue<int>("CacheTimeSeconds");
 
-            var host = config.GetValue<string>("Sidecar:Database:Host");
-            var username = config.GetValue<string>("Sidecar:Database:Username");
-            var password = config.GetValue<string>("Sidecar:Database:Password");
-            var database = config.GetValue<string>("Sidecar:Database:Database");
+            var host = config.GetValue<string>("Database:Host");
+            var username = config.GetValue<string>("Database:Username");
+            var password = config.GetValue<string>("Database:Password");
+            var database = config.GetValue<string>("Database:Database");
 
             _connString = String.Format("Host={0};Username={1};Password={2};Database={3}", host, username, password, database);
         }

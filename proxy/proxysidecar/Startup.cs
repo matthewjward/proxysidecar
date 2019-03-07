@@ -32,8 +32,8 @@ namespace emptysidecar
 
                 if (!string.IsNullOrEmpty(user))
                 {
-                    var alias = config.GetValue<string>("Sidecar:Downstream:Alias");
-                    var port = config.GetValue<string>("Sidecar:Downstream:Port");
+                    var alias = config.GetValue<string>("Downstream:Alias");
+                    var port = config.GetValue<string>("Downstream:Port");
 
                     var forwardContext = context.ForwardTo(String.Format("http://{0}:{1}",alias, port));
                     if (repo.HasSpecialPower(user))

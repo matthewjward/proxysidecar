@@ -1,0 +1,13 @@
+{
+  "name": "permissionapi",
+  "version": "1.0.0",
+  "description": "Permission Checkin API",
+  "author": "Matt Ward <matt@mattward.net>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1"
+  }
+}
