@@ -1,5 +1,0 @@
-CREATE DATABASE Users;
-
-\connect users
-
-Create Table Users ( Name TEXT PRIMARY KEY, HasSpecialPower bool);

@@ -9,7 +9,15 @@ const HOST = '0.0.0.0';
 // App
 const app = express();
 app.get('/', (req, res) => {
-  res.send('Hello world\n');
+  var headerValue = req.get("Permission")
+
+  if (headerValue == "HasSpecialPower") {
+    res.send('Hello world\n');
+  }
+
+  res.status(403);
+  res.send()
+
 });
 
 app.listen(PORT, HOST);

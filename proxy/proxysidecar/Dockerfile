@@ -4,15 +4,15 @@ EXPOSE 80
  
 FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
-COPY emptysidecar.csproj .
-RUN dotnet restore emptysidecar.csproj
+COPY proxysidecar.csproj .
+RUN dotnet restore proxysidecar.csproj
 COPY . .
-RUN dotnet build emptysidecar.csproj -c Release -o /app
+RUN dotnet build proxysidecar.csproj -c Release -o /app
  
 FROM build AS publish
-RUN dotnet publish emptysidecar.csproj -c Release -o /app
+RUN dotnet publish proxysidecar.csproj -c Release -o /app
  
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "emptysidecar.dll"]
+ENTRYPOINT ["dotnet", "proxysidecar.dll"]

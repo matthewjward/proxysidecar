@@ -1,20 +1,19 @@
 ﻿using System;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace emptysidecar
 {
     public class Repository
     {
-        string _connString;
-        int _timeout; 
-        MemoryCache _cache;
+        private readonly string _connString;
+        private readonly ILogger _logger;
 
-        public Repository(IConfiguration config)
+        public Repository(IConfiguration config, ILogger<Repository> logger)
         {
-            _cache = new MemoryCache(new MemoryCacheOptions());
-            _timeout = config.GetValue<int>("CacheTimeSeconds");
+            _logger = logger;
 
             var host = config.GetValue<string>("Database:Host");
             var username = config.GetValue<string>("Database:Username");
@@ -24,49 +23,37 @@ namespace emptysidecar
             _connString = String.Format("Host={0};Username={1};Password={2};Database={3}", host, username, password, database);
         }
 
-        public bool HasSpecialPower(string name)
+        public bool UserHasPermission(string permission, string name)
         {
-            bool hasSpecialPower;
-
-            // Look for cache key.
-            if (!_cache.TryGetValue(name, out hasSpecialPower))
+            bool permissionValue = false;
+            try
             {
-                // Key not in cache, so get data.
-                hasSpecialPower = HitTheDatabase(name);
-
-                // Set cache options.
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    // Keep in cache for this time, reset time if accessed.
-                    .SetAbsoluteExpiration(TimeSpan.FromSeconds(_timeout));
-
-                // Save data in cache.
-                _cache.Set(name, hasSpecialPower, cacheEntryOptions);
-            }
-
-            return hasSpecialPower;
-        }
-
-        private bool HitTheDatabase(string name)
-        {
-            bool hasSpecialPower = false;
-            using (var conn = new NpgsqlConnection(_connString))
-            {
-                conn.Open();
-
-                // Insert some data
-                using (var cmd = new NpgsqlCommand())
+                using (var conn = new NpgsqlConnection(_connString))
                 {
-                    cmd.Connection = conn;
-                    cmd.CommandText = "SELECT HasSpecialPower FROM users WHERE Name = @name";
-                    cmd.Parameters.AddWithValue("name", name);
-                    var result = cmd.ExecuteScalar();
-                    if (result != null)
+                    conn.Open();
+
+                    // Insert some data
+                    using (var cmd = new NpgsqlCommand())
                     {
-                        hasSpecialPower = (bool)result;
+                        cmd.Connection = conn;
+                        cmd.CommandText = "SELECT "+permission+" FROM users WHERE Name = @name";
+                        cmd.Parameters.AddWithValue("permission", permission);
+                        cmd.Parameters.AddWithValue("name", name);
+                        var result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            _logger.LogInformation("DBResult:" + result);
+                            permissionValue = (bool)result;
+                        }
                     }
                 }
             }
-            return hasSpecialPower;
+            catch(Exception e)
+            {
+                _logger.LogError("Database Error" + e.Message);
+            }
+
+            return permissionValue;
         }
     }
 }
